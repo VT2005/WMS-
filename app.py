@@ -4,36 +4,31 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
 import random
 import time
-import os
-from dotenv import load_dotenv
 
-load_dotenv()
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY")
+app.secret_key = "supersecretkey"
+socketio = SocketIO(app)
 
 from flask_mail import Mail, Message
 
 # Configure Flask-Mail
-app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
-app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
-app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True') == 'True'
-app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL', 'False') == 'True'
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = 'tvarshitha.123@gmail.com'  # Replace with your email
+app.config['MAIL_PASSWORD'] = 'yxfc jgns euww yzup'  # Replace with your email's app password
+app.config['MAIL_DEFAULT_SENDER'] = 'tvarshitha.123@gmail.com'  # Replace with your email
 mail = Mail(app)
-
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 # Initialize the user and collection databases
 def init_db():
     # Database setup for MySQL
     conn = mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", ""),
-        database=os.getenv("DB_NAME", "wms"),
-        port=3306
+        host="localhost",
+        user="root",
+        password="root",
+        database="wms"
     )
     cursor = conn.cursor()
 
@@ -90,11 +85,10 @@ def login():
         password = request.form["password"]
 
         conn = mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", ""),
-        database=os.getenv("DB_NAME", "wms"),
-        port=3306
+            host="localhost",
+            user="root",
+            password="root",
+            database="wms"
         )
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
@@ -128,11 +122,10 @@ def register():
 
         try:
             conn = mysql.connector.connect(
-            host=os.getenv("DB_HOST", "localhost"),
-            user=os.getenv("DB_USER", "root"),
-            password=os.getenv("DB_PASSWORD", ""),
-            database=os.getenv("DB_NAME", "wms"),
-            port=3306
+                host="localhost",
+                user="root",
+                password="root",
+                database="wms"
             )
             cursor = conn.cursor()
             cursor.execute("INSERT INTO users (name, email, password) VALUES (%s, %s, %s)", (name, email, hashed_password))
@@ -161,11 +154,10 @@ def admin_login():
         password = request.form["password"]
 
         conn = mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", ""),
-        database=os.getenv("DB_NAME", "wms"),
-        port=3306
+            host="localhost",
+            user="root",
+            password="root",
+            database="wms"
         )
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM admins WHERE email = %s", (email,))
@@ -188,11 +180,10 @@ def admin_dashboard():
         return redirect(url_for("admin_login"))
 
     conn = mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", ""),
-        database=os.getenv("DB_NAME", "wms"),
-        port=3306
+        host="localhost",
+        user="root",
+        password="root",
+        database="wms"
     )
     cursor = conn.cursor()
     cursor.execute("SELECT id, collector_name, collector_email, waste_type, quantity, collection_date, collection_time, address, status FROM request_collection")
@@ -212,11 +203,10 @@ def admin_register():
         hashed_password = generate_password_hash(password, method="sha256")
 
         conn = mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", ""),
-        database=os.getenv("DB_NAME", "wms"),
-        port=3306
+            host="localhost",
+            user="root",
+            password="root",
+            database="wms"
         )
         cursor = conn.cursor()
         try:
@@ -240,11 +230,10 @@ def update_request_status(request_id):
 
     # Update the status in the database
     conn = mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", ""),
-        database=os.getenv("DB_NAME", "wms"),
-        port=3306
+        host="localhost",
+        user="root",
+        password="root",
+        database="wms"
     )
     cursor = conn.cursor()
     
@@ -291,11 +280,10 @@ def request_collection():
         address = request.form["address"]
 
         conn = mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", ""),
-        database=os.getenv("DB_NAME", "wms"),
-        port=3306
+            host="localhost",
+            user="root",
+            password="root",
+            database="wms"
         )
         cursor = conn.cursor()
         cursor.execute('''INSERT INTO request_collection
@@ -321,11 +309,10 @@ def delete_request(request_id):
         return redirect(url_for("login"))
     
     conn = mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", ""),
-        database=os.getenv("DB_NAME", "wms"),
-        port=3306
+        host="localhost",
+        user="root",
+        password="root",
+        database="wms"
     )
     cursor = conn.cursor()
     cursor.execute("DELETE FROM request_collection WHERE id = %s", (request_id,))
@@ -342,11 +329,10 @@ def waste_collections():
         return redirect(url_for("login"))
 
     conn = mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", ""),
-        database=os.getenv("DB_NAME", "wms"),
-        port=3306
+        host="localhost",
+        user="root",
+        password="root",
+        database="wms"
     )
     cursor = conn.cursor()
     cursor.execute("SELECT id, collector_name, collector_email, waste_type, quantity, collection_date, collection_time, address FROM request_collection")
@@ -450,5 +436,4 @@ def select_area():
     return render_template("route_info.html", city=city, areas=areas, route_info=route_info)
 
 if __name__ == "__main__":
-    app.run(debug=True)
-
+    socketio.run(app, debug=True)
